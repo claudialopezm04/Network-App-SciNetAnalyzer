@@ -2,6 +2,7 @@ import socket
 import json
 from article_search import search_articles
 from excel_export import export_to_excel
+from charts import generate_charts
 
 HOST = "127.0.0.1"
 PORT = 65432
@@ -34,11 +35,13 @@ for article in articles:
     print(f"- {article['title']} ({article['year']})")
 
 excel_file = export_to_excel(articles)
+chart_files = generate_charts(articles)
 
 response = {
     "message": f"Found {len(articles)} articles for keyword '{keyword}'",
     "articles": articles,
-    "excel_file": excel_file
+    "excel_file": excel_file,
+    "chart_files": chart_files
 }
 
 conn.sendall(json.dumps(response).encode())

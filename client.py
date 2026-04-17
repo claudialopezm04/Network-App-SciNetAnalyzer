@@ -31,4 +31,8 @@ for article in response["articles"]:
 
 print(f"\nExcel file created: {response['excel_file']}")
 
+print("\nChart files created:")
+for chart in response["chart_files"]:
+    print(f"- {chart}")
+
 client.close()
