@@ -40,8 +40,12 @@ print("\nArticles found:")
 for article in articles:
     print(f"- {article['title']} ({article['year']})")
 
-excel_file = export_to_excel(articles, output_folder, keyword, year_from, year_to, timestamp)
-chart_files = generate_charts(articles, output_folder, keyword, year_from, year_to, timestamp)
+if len(articles) > 0:
+    excel_file = export_to_excel(articles, output_folder, keyword, year_from, year_to, timestamp)
+    chart_files = generate_charts(articles, output_folder, keyword, year_from, year_to, timestamp)
+else:
+    excel_file = None
+    chart_files = []
 
 response = {
     "message": f"Found {len(articles)} articles for keyword '{keyword}'",

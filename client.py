@@ -19,7 +19,14 @@ request = {
 
 client.sendall(json.dumps(request).encode())
 
-data = client.recv(4096).decode()
+chunks = []
+while True:
+    part = client.recv(4096)
+    if not part:
+        break
+    chunks.append(part)
+
+data = b"".join(chunks).decode()
 response = json.loads(data)
 
 print("\nServer response:")
@@ -29,10 +36,11 @@ print("\nArticles received:")
 for article in response["articles"]:
     print(f"- {article['title']} ({article['year']})")
 
-print(f"\nExcel file created: {response['excel_file']}")
+if response["excel_file"]:
+    print(f"\nExcel file created: {response['excel_file']}")
 
-print("\nChart files created:")
-for chart in response["chart_files"]:
-    print(f"- {chart}")
-
+if response["chart_files"]:
+    print("\nChart files created:")
+    for chart in response["chart_files"]:
+        print(f"- {chart}")
 client.close()
