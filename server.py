@@ -1,5 +1,7 @@
 import socket
 import json
+import os
+from datetime import datetime
 from article_search import search_articles
 from excel_export import export_to_excel
 from charts import generate_charts
@@ -23,6 +25,10 @@ keyword = request["keyword"]
 year_from = request["year_from"]
 year_to = request["year_to"]
 
+safe_keyword = keyword.replace(" ", "_").lower()
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+output_folder = os.path.join("results", f"{safe_keyword}_{year_from}_{year_to}_{timestamp}")
+
 print("Received data:")
 print(f"Keyword: {keyword}")
 print(f"From year: {year_from}")
@@ -34,8 +40,8 @@ print("\nArticles found:")
 for article in articles:
     print(f"- {article['title']} ({article['year']})")
 
-excel_file = export_to_excel(articles, keyword, year_from, year_to)
-chart_files = generate_charts(articles, keyword, year_from, year_to)
+excel_file = export_to_excel(articles, output_folder, keyword, year_from, year_to, timestamp)
+chart_files = generate_charts(articles, output_folder, keyword, year_from, year_to, timestamp)
 
 response = {
     "message": f"Found {len(articles)} articles for keyword '{keyword}'",

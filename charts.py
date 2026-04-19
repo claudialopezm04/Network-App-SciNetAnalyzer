@@ -1,21 +1,25 @@
 import matplotlib.pyplot as plt
 import os
-from datetime import datetime
 
-def generate_charts(articles, keyword, year_from, year_to):
-    os.makedirs("results", exist_ok=True)
+def generate_charts(articles, output_folder, keyword, year_from, year_to, timestamp):
+    os.makedirs(output_folder, exist_ok=True)
 
     safe_keyword = keyword.replace(" ", "_").lower()
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # File names
-    year_chart = f"results/{safe_keyword}_{year_from}_{year_to}_articles_by_year_{timestamp}.png"
-    country_chart = f"results/{safe_keyword}_{year_from}_{year_to}_articles_by_country_{timestamp}.png"
-    citations_chart = f"results/{safe_keyword}_{year_from}_{year_to}_citations_per_article_{timestamp}.png"
+    year_chart = os.path.join(
+        output_folder,
+        f"{safe_keyword}_{year_from}_{year_to}_articles_by_year_{timestamp}.png"
+    )
+    country_chart = os.path.join(
+        output_folder,
+        f"{safe_keyword}_{year_from}_{year_to}_articles_by_country_{timestamp}.png"
+    )
+    citations_chart = os.path.join(
+        output_folder,
+        f"{safe_keyword}_{year_from}_{year_to}_citations_per_article_{timestamp}.png"
+    )
 
-    # -------------------------------
     # Chart 1: Articles by year
-    # -------------------------------
     years = {}
     for article in articles:
         year = article["year"]
@@ -38,9 +42,7 @@ def generate_charts(articles, keyword, year_from, year_to):
     plt.savefig(year_chart)
     plt.close()
 
-    # -------------------------------
     # Chart 2: Articles by country
-    # -------------------------------
     countries = {}
     for article in articles:
         country = article["country"]
@@ -64,9 +66,7 @@ def generate_charts(articles, keyword, year_from, year_to):
     plt.savefig(country_chart)
     plt.close()
 
-    # -------------------------------
     # Chart 3: Citations per article
-    # -------------------------------
     titles = [article["title"] for article in articles]
     citations = [article["citations"] for article in articles]
 
