@@ -1,8 +1,17 @@
 import matplotlib.pyplot as plt
 import os
+from datetime import datetime
 
-def generate_charts(articles):
+def generate_charts(articles, keyword, year_from, year_to):
     os.makedirs("results", exist_ok=True)
+
+    safe_keyword = keyword.replace(" ", "_").lower()
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # File names
+    year_chart = f"results/{safe_keyword}_{year_from}_{year_to}_articles_by_year_{timestamp}.png"
+    country_chart = f"results/{safe_keyword}_{year_from}_{year_to}_articles_by_country_{timestamp}.png"
+    citations_chart = f"results/{safe_keyword}_{year_from}_{year_to}_citations_per_article_{timestamp}.png"
 
     # -------------------------------
     # Chart 1: Articles by year
@@ -26,7 +35,7 @@ def generate_charts(articles):
     plt.ylabel("Number of Articles", fontsize=11)
     plt.grid(axis="y", linestyle="--", alpha=0.5)
     plt.tight_layout()
-    plt.savefig("results/articles_by_year.png")
+    plt.savefig(year_chart)
     plt.close()
 
     # -------------------------------
@@ -52,7 +61,7 @@ def generate_charts(articles):
     plt.grid(axis="y", linestyle="--", alpha=0.5)
     plt.xticks(rotation=20)
     plt.tight_layout()
-    plt.savefig("results/articles_by_country.png")
+    plt.savefig(country_chart)
     plt.close()
 
     # -------------------------------
@@ -74,11 +83,7 @@ def generate_charts(articles):
     plt.grid(axis="y", linestyle="--", alpha=0.5)
     plt.xticks(rotation=25, ha="right")
     plt.tight_layout()
-    plt.savefig("results/citations_per_article.png")
+    plt.savefig(citations_chart)
     plt.close()
 
-    return [
-        "results/articles_by_year.png",
-        "results/articles_by_country.png",
-        "results/citations_per_article.png"
-    ]
+    return [year_chart, country_chart, citations_chart]

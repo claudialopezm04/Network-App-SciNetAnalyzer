@@ -35,7 +35,7 @@ for article in articles:
     print(f"- {article['title']} ({article['year']})")
 
 excel_file = export_to_excel(articles, keyword, year_from, year_to)
-chart_files = generate_charts(articles)
+chart_files = generate_charts(articles, keyword, year_from, year_to)
 
 response = {
     "message": f"Found {len(articles)} articles for keyword '{keyword}'",
