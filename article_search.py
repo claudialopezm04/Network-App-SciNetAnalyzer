@@ -1,13 +1,14 @@
 import requests
 
 
-def format_authors(authors_list):
-    if not authors_list:
+def format_authors(authorships):
+    if not authorships:
         return "Unknown"
 
     names = []
-    for author in authors_list:
-        name = author.get("name", "").strip()
+    for author_item in authorships:
+        author_info = author_item.get("author", {})
+        name = author_info.get("display_name", "").strip()
         if name:
             names.append(name)
 
@@ -32,26 +33,30 @@ def search_articles(keyword, year_from, year_to):
     year_from = int(year_from)
     year_to = int(year_to)
 
-    url = "https://api.semanticscholar.org/graph/v1/paper/search"
+    url = "https://api.openalex.org/works"
 
     params = {
-        "query": keyword,
-        "limit": 20,
-        "fields": "title,authors,year,abstract,citationCount,externalIds,url"
+        "search": keyword,
+        "filter": f"from_publication_date:{year_from}-01-01,to_publication_date:{year_to}-12-31",
+        "per-page": 10
+    }
+
+    headers = {
+        "User-Agent": "SciNetAnalyzer/1.0"
     }
 
     articles = []
     seen_titles = set()
 
     try:
-        response = requests.get(url, params=params, timeout=20)
+        response = requests.get(url, params=params, headers=headers, timeout=20)
         response.raise_for_status()
 
         data = response.json()
-        papers = data.get("data", [])
+        works = data.get("results", [])
 
-        for paper in papers:
-            title = str(paper.get("title", "")).strip()
+        for work in works:
+            title = str(work.get("display_name", "")).strip()
             if not title or len(title) < 8:
                 continue
 
@@ -59,7 +64,7 @@ def search_articles(keyword, year_from, year_to):
             if normalized_title in seen_titles:
                 continue
 
-            year = paper.get("year")
+            year = work.get("publication_year")
             if year is None:
                 continue
 
@@ -68,29 +73,27 @@ def search_articles(keyword, year_from, year_to):
             except (ValueError, TypeError):
                 continue
 
-            if not (year_from <= year <= year_to):
-                continue
+            authors = format_authors(work.get("authorships", []))
 
-            authors = format_authors(paper.get("authors", []))
+            abstract = "No abstract available"
+            if work.get("abstract_inverted_index"):
+                abstract = "Abstract available in source data"
 
-            abstract = paper.get("abstract")
-            if not abstract:
-                abstract = "No abstract available"
-
-            citations = paper.get("citationCount", 0)
+            cited_by_count = work.get("cited_by_count", 0)
             try:
-                citations = int(citations)
+                citations = int(cited_by_count)
             except (ValueError, TypeError):
                 citations = 0
 
-            external_ids = paper.get("externalIds", {}) or {}
-            doi = external_ids.get("DOI", "N/A")
+            doi = work.get("doi", "N/A")
+            if doi and doi != "N/A":
+                doi = doi.replace("https://doi.org/", "")
 
             article = {
                 "title": title,
                 "authors": authors,
                 "year": year,
-                "doi": doi,
+                "doi": doi if doi else "N/A",
                 "abstract": abstract,
                 "citations": citations,
                 "country": "Unknown",
@@ -101,6 +104,6 @@ def search_articles(keyword, year_from, year_to):
             seen_titles.add(normalized_title)
 
     except requests.RequestException as e:
-        print(f"Error while searching Semantic Scholar API: {e}")
+        print(f"Error while searching OpenAlex API: {e}")
 
     return articles
