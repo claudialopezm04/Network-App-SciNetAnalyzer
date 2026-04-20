@@ -1,5 +1,27 @@
 import matplotlib.pyplot as plt
 import os
+import pycountry
+
+
+def get_country_name(code):
+    if not code:
+        return "Unknown"
+
+    if code == "Unknown":
+        return "Unknown"
+
+    if code == "Multiple":
+        return "Multiple Countries"
+
+    try:
+        country = pycountry.countries.get(alpha_2=code.upper())
+        if country:
+            return country.name
+    except Exception:
+        pass
+
+    return code
+
 
 def generate_charts(articles, output_folder, keyword, year_from, year_to, timestamp):
     os.makedirs(output_folder, exist_ok=True)
@@ -45,7 +67,7 @@ def generate_charts(articles, output_folder, keyword, year_from, year_to, timest
     # Chart 2: Articles by country
     countries = {}
     for article in articles:
-        country = article["country"]
+        country = get_country_name(article["country"])
         countries[country] = countries.get(country, 0) + 1
 
     sorted_countries = dict(sorted(countries.items(), key=lambda item: item[1], reverse=True))
